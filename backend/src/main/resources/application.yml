@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: zero-prompt-creative-studio
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: 8080
+
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  model: ${GEMINI_MODEL:gemini-2.0-flash-exp-image-generation}
+  timeout-seconds: 30
+  max-retries: 2
+
+storage:
+  base-path: ./generated-images
+
+async:
+  core-pool-size: 4
+  max-pool-size: 10
+  queue-capacity: 50
+  thread-name-prefix: gen-
+
+webclient:
+  max-in-memory-size: 10485760 # 10MB
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

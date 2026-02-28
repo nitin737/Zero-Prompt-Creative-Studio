@@ -34,3 +34,16 @@ coverage/
 # Misc
 .cache/
 tmp/
+
+# Backend
+backend/build/
+backend/.gradle/
+backend/generated-images/
+backend/bin/
+backend/target/
+# Gradle wrapper should be committed, but some might prefer to ignore specific parts
+# !gradle/wrapper/gradle-wrapper.jar
+
+*.class
+*.jar
+*.war
