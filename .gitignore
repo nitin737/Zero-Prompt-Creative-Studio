@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
-package-lock.json
+# package-lock.json
+# !package-lock.json
 
 # Build output
 dist/
@@ -35,15 +36,17 @@ coverage/
 .cache/
 tmp/
 
-# Backend
+# Build output
 backend/build/
 backend/.gradle/
 backend/generated-images/
 backend/bin/
 backend/target/
-# Gradle wrapper should be committed, but some might prefer to ignore specific parts
-# !gradle/wrapper/gradle-wrapper.jar
 
+# Files to ignore
 *.class
 *.jar
 *.war
+
+# Exceptions
+!backend/gradle/wrapper/gradle-wrapper.jar
