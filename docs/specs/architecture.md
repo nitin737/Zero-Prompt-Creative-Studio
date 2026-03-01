@@ -59,7 +59,6 @@ Zero-Prompt-Creative-Studio/
 │   │   │   │   ├── config/
 │   │   │   │   │   ├── AsyncConfig.java           # Thread pool for @Async generation
 │   │   │   │   │   ├── CorsConfig.java
-│   │   │   │   │   ├── WebClientConfig.java
 │   │   │   │   │   ├── GeminiProperties.java      # @ConfigurationProperties (type-safe)
 │   │   │   │   │   └── StorageProperties.java
 │   │   │   │   ├── controller/
@@ -206,7 +205,7 @@ graph TB
     StrategyFactory --> Strategy
     Strategy --> AIClient
     AIClient -.->|"implemented by"| GeminiAdapter
-    GeminiAdapter -->|"WebClient"| GeminiAPI
+    GeminiAdapter -->|"google-genai SDK"| GeminiAPI
     Orchestrator --> StorageSvc
     Orchestrator --> Repository
     Orchestrator --> EventBus
@@ -333,12 +332,11 @@ graph LR
 | Dependency | Purpose |
 |:---|:---|
 | `spring-boot-starter-web` | REST API (Tomcat) |
-| `spring-boot-starter-webflux` | WebClient for non-blocking Gemini API calls |
 | `spring-boot-starter-validation` | Request validation (`@Valid`, `@NotNull`) |
 | `spring-boot-starter-actuator` | Health checks & metrics |
 | `lombok` | Boilerplate reduction (`@Data`, `@Builder`, `@Slf4j`) |
 | `springdoc-openapi` | Auto-generated Swagger/OpenAPI docs |
-| `google-cloud-vertexai` | Google Gemini SDK (or REST via WebClient) |
+| `google-genai` | Google GenAI SDK for Gemini API calls |
 
 ### 4.2 Layered Architecture (SOLID)
 
@@ -406,7 +404,7 @@ graph TD
     I3 -.-> IC
     O2 --> E1
     E1 --> E2
-    IA -->|"WebClient"| GeminiAPI["Gemini API"]
+    IA -->|"google-genai SDK"| GeminiAPI["Gemini API"]
 
     style Presentation fill:#1A1A2E,stroke:#7C3AED,color:#F1F5F9
     style Orchestration fill:#12121A,stroke:#7C3AED,color:#F1F5F9
@@ -427,7 +425,6 @@ com.zpcs
 ├── config/                               # Cross-cutting configuration
 │   ├── AsyncConfig.java                  # Thread pool for @Async generation
 │   ├── CorsConfig.java                   # CORS for React dev server
-│   ├── WebClientConfig.java              # WebClient bean
 │   ├── GeminiProperties.java             # @ConfigurationProperties (type-safe)
 │   └── StorageProperties.java
 ├── controller/                           # Thin controllers (SRP)

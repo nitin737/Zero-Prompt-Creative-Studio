@@ -20,13 +20,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.Resource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -41,8 +39,7 @@ public class DefaultImageGenerationOrchestrator implements ImageGenerationOrches
         private final ApplicationEventPublisher eventPublisher;
 
         @Override
-        @Async("generationExecutor")
-        public CompletableFuture<GeneratedImageResponse> generate(GenerateImageRequest request) {
+        public GeneratedImageResponse generate(GenerateImageRequest request) {
                 long startTime = System.currentTimeMillis();
                 String imageId = "img_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
@@ -85,12 +82,11 @@ public class DefaultImageGenerationOrchestrator implements ImageGenerationOrches
                 eventPublisher.publishEvent(new ImageGeneratedEvent(this, record));
 
                 // 6. Map to response
-                return CompletableFuture.completedFuture(toResponse(imageId, prompt, elapsed, request));
+                return toResponse(imageId, prompt, elapsed, request);
         }
 
         @Override
-        @Async("generationExecutor")
-        public CompletableFuture<GeneratedImageResponse> edit(EditImageRequest request) {
+        public GeneratedImageResponse edit(EditImageRequest request) {
                 // Convert edit request to generate request for reuse
                 GenerateImageRequest generateRequest = GenerateImageRequest.builder()
                                 .subject(request.getSubject())

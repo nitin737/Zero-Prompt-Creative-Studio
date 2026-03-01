@@ -147,7 +147,7 @@ classDiagram
     }
 
     class GeminiClientAdapter {
-        -WebClient webClient
+        -Client genAiClient
         -GeminiProperties properties
         +generateImage(AiModelRequest) Mono~AiModelResponse~
     }
@@ -879,62 +879,45 @@ public class StyleTransferStrategy implements GenerationStrategy {
 @Slf4j
 public class GeminiClientAdapter implements AiModelClient {
 
-    private final WebClient webClient;
     private final GeminiProperties properties;
-
-    private static final String API_URL =
-        "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent";
 
     @Override
     public Mono<AiModelResponse> generateImage(AiModelRequest request) {
-        long start = System.currentTimeMillis();
-        Map<String, Object> body = buildGeminiRequestBody(request);
+        return Mono.fromCallable(() -> {
+            long start = System.currentTimeMillis();
 
-        return webClient.post()
-            .uri(API_URL, request.getModel())
-            .header("x-goog-api-key", properties.getApiKey())
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(body)
-            .retrieve()
-            .onStatus(HttpStatusCode::is4xxClientError, resp ->
-                resp.bodyToMono(String.class)
-                    .flatMap(b -> Mono.error(new GeminiApiException("Client error: " + b))))
-            .onStatus(status -> status.value() == 429, resp ->
-                Mono.error(new QuotaExceededException(60)))
-            .onStatus(HttpStatusCode::is5xxServerError, resp ->
-                Mono.error(new GeminiApiException("Gemini API unavailable")))
-            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-            .map(responseMap -> adaptToAiModelResponse(responseMap, start))
-            .timeout(Duration.ofSeconds(properties.getTimeoutSeconds()))
-            .doOnError(e -> log.error("Gemini API call failed", e));
-    }
+            try (Client client = new Client()) {
+                GenerateContentConfig config = GenerateContentConfig.builder()
+                        .responseModalities(Arrays.asList("TEXT", "IMAGE"))
+                        .build();
 
-    // Adapter: converts external Gemini response → internal AiModelResponse
-    private AiModelResponse adaptToAiModelResponse(Map<String, Object> raw, long start) {
-        byte[] imageData = GeminiResponseParser.extractImageBytes(raw);
-        return AiModelResponse.builder()
-            .imageData(imageData)
-            .mimeType("image/png")
-            .processingTimeMs(System.currentTimeMillis() - start)
-            .build();
-    }
+                GenerateContentResponse response = client.models.generateContent(
+                        request.getModel(),
+                        request.getPrompt(),
+                        config);
 
-    private Map<String, Object> buildGeminiRequestBody(AiModelRequest req) {
-        List<Map<String, Object>> parts = new ArrayList<>();
-        parts.add(Map.of("text", req.getPrompt()));
-        if (req.getSourceImage() != null) {
-            parts.add(Map.of("inlineData", Map.of(
-                "mimeType", "image/png",
-                "data", Base64.getEncoder().encodeToString(req.getSourceImage())
-            )));
-        }
-        return Map.of(
-            "contents", List.of(Map.of("parts", parts)),
-            "generationConfig", Map.of(
-                "responseModalities", List.of("IMAGE", "TEXT"),
-                "imageDimension", Map.of("aspectRatio", req.getAspectRatio())
-            )
-        );
+                for (Part part : response.parts()) {
+                    if (part.inlineData().isPresent()) {
+                        var blob = part.inlineData().get();
+                        if (blob.data().isPresent()) {
+                            byte[] imageData = blob.data().get();
+                            return AiModelResponse.builder()
+                                    .imageData(imageData)
+                                    .mimeType(blob.mimeType().isPresent() ? blob.mimeType().get() : "image/png")
+                                    .processingTimeMs(System.currentTimeMillis() - start)
+                                    .build();
+                        }
+                    }
+                }
+
+                throw new GeminiApiException("No image returned from Gemini API");
+            } catch (Exception e) {
+                log.error("Gemini API call failed", e);
+                throw new GeminiApiException("Gemini API call failed: " + e.getMessage());
+            }
+        })
+        .subscribeOn(Schedulers.boundedElastic())
+        .timeout(Duration.ofSeconds(properties.getTimeoutSeconds()));
     }
 }
 ```

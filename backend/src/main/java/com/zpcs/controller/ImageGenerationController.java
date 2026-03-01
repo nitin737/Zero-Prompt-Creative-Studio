@@ -14,8 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.CompletableFuture;
-
 @RestController
 @RequestMapping("/api/v1/images")
 @RequiredArgsConstructor
@@ -27,18 +25,18 @@ public class ImageGenerationController {
 
     @PostMapping("/generate")
     @Operation(summary = "Generate a new image from options")
-    public CompletableFuture<ResponseEntity<GeneratedImageResponse>> generate(
+    public ResponseEntity<GeneratedImageResponse> generate(
             @Valid @RequestBody GenerateImageRequest request) {
         log.info("Generate: mode={}, style={}", request.getOperationMode(), request.getAestheticStyle());
-        return orchestrator.generate(request).thenApply(ResponseEntity::ok);
+        return ResponseEntity.ok(orchestrator.generate(request));
     }
 
     @PostMapping("/edit")
     @Operation(summary = "Edit an existing image")
-    public CompletableFuture<ResponseEntity<GeneratedImageResponse>> edit(
+    public ResponseEntity<GeneratedImageResponse> edit(
             @Valid @RequestBody EditImageRequest request) {
         log.info("Edit: mode={}", request.getOperationMode());
-        return orchestrator.edit(request).thenApply(ResponseEntity::ok);
+        return ResponseEntity.ok(orchestrator.edit(request));
     }
 
     @GetMapping("/{id}/file")

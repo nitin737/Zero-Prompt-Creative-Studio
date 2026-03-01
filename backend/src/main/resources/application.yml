@@ -10,9 +10,9 @@ server:
 
 gemini:
   api-key: ${GEMINI_API_KEY}
-  model: ${GEMINI_MODEL:gemini-2.0-flash-exp-image-generation}
-  timeout-seconds: 30
-  max-retries: 2
+  model: ${GEMINI_MODEL}
+  timeout-seconds: 120
+  max-retries: 0
 
 storage:
   base-path: ./generated-images
@@ -23,8 +23,6 @@ async:
   queue-capacity: 50
   thread-name-prefix: gen-
 
-webclient:
-  max-in-memory-size: 10485760 # 10MB
 
 springdoc:
   api-docs:

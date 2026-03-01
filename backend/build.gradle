@@ -45,6 +45,9 @@ dependencies {
 
     // Dotenv to load variables from .env file
     // implementation 'me.paulschwarz:dotenv-spring-boot-starter:0.2.0'
+    
+    // Google GenAI
+    implementation 'com.google.genai:google-genai:1.0.0'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

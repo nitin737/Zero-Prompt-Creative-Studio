@@ -6,7 +6,7 @@ WORKDIR /app
 # Copy root .env for build-time env vars (Vite needs them)
 COPY .env ./
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm install
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # Copy frontend source
 COPY frontend/ .

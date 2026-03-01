@@ -1,26 +1,24 @@
-# Ignore Docker artifacts
-.docker/
-docker-compose.override.yml
+# Git
+.git
+.gitignore
 
-# Ignore Gradle artifacts
-.gradle/
-build/
-bin/
-!gradle/wrapper/gradle-wrapper.jar
-
-# Ignore environment files
-# .env
-.env.local
-
-# Ignore OS files
-.DS_Store
-Thumbs.db
-
-# Backend specific
+# Backend
 backend/build/
 backend/.gradle/
-backend/generated-images/
+backend/out/
 
-# Frontend specific
+# Frontend
 frontend/node_modules/
 frontend/dist/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs
+logs/
+*.log
+
+# Other
+generated-images/

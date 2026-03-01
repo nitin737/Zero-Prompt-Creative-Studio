@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -33,8 +31,7 @@ public class TextToImageStrategy implements GenerationStrategy {
                 .height(ctx.getAiConfig().getImageHeight())
                 .build();
 
-        AiModelResponse response = aiModelClient.generateImage(aiRequest)
-                .block(Duration.ofSeconds(30));
+        AiModelResponse response = aiModelClient.generateImage(aiRequest);
 
         return GenerationResult.builder()
                 .imageData(response.getImageData())

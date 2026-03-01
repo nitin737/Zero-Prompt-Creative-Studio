@@ -12,11 +12,11 @@ COPY backend/build.gradle backend/settings.gradle ./
 RUN chmod +x gradlew
 
 # Pre-fetch dependencies to speed up builds
-RUN ./gradlew dependencies --no-daemon
+RUN --mount=type=cache,target=/root/.gradle ./gradlew dependencies --no-daemon
 
 # Copy source and build
 COPY backend/src src
-RUN ./gradlew bootJar --no-daemon
+RUN --mount=type=cache,target=/root/.gradle ./gradlew bootJar --no-daemon -x test
 
 # Stage 2: Run
 FROM eclipse-temurin:21-jre-jammy
